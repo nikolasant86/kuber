@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    namespace: homework
+    name: nginx-config
+data:
+    site.conf: |
+        server {
+            listen 8080;
+            server_name homework.otus;
+
+            root /homework;
+
+            index index.html;
+        
+            location / {
+                try_files $uri $uri/ =404;
+            }
+
+            location /homework {
+                alias /homework/;
+                index index.html;
+                try_files $uri $uri/ =404;
+            }
+
+            location /homework/homepage {
+                alias /homework/;
+                index index.html;
+                try_files $uri $uri/ =404;
+            }
+
+        }

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: pod-deployment
+    namespace: homework
+    labels:
+        app: nginx
+spec:
+    replicas: 3
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
+    selector:
+        matchLabels:
+            app: nginx
+    template:
+        metadata:
+            labels:
+                app: nginx
+        spec:
+            nodeSelector:
+                homework: "true"
+            initContainers:
+              - name: init-container
+                image: busybox:1.36
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                      wget -O /init/index.html https://google.com/index.html
+                volumeMounts:
+                  - name: media-volume
+                    mountPath: /init
+            containers:
+              - name: nginx-container
+                image: nginx:1.25-alpine
+                ports:
+                  - containerPort: 8080
+                    protocol: TCP
+                resources:
+                    limits:
+                        cpu: "500m"
+                        memory: "256M"
+                volumeMounts:
+                  - name: nginx-config-volume
+                    mountPath: /etc/nginx/conf.d
+                  - name: media-volume
+                    mountPath: /homework
+                lifecycle:
+                    preStop:
+                        exec:
+                            command:
+                              - /bin/sh
+                              - -c
+                              - |
+                                  rm -f /homework/index.html
+                readinessProbe:
+                    httpGet:
+                        path: /index.html
+                        port: 8080
+                        httpHeaders:
+                          - name: Host
+                            value: homework.otus
+                    initialDelaySeconds: 5
+                    periodSeconds: 5
+                    successThreshold: 1
+                    failureThreshold: 3
+                                
+            volumes:
+              - name: nginx-config-volume
+                configMap:
+                    name: nginx-config
+              - name: media-volume
+                emptyDir: {}
