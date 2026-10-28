@@ -5,4 +5,4 @@ metadata:
     name: pod-config
 data:
     pvc: homework-pvc
-    storageClassName: nfs-storage
+    storageClassName: nfs-storage2

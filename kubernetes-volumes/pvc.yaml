@@ -2,8 +2,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
     name: homework-pvc
+    namespace: homework
 spec:
-    storageClassName: nfs-storage
+    storageClassName: nfs-storage2
     accessModes:
       - ReadWriteMany
     resources:
